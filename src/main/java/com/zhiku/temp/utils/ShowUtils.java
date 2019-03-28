@@ -74,6 +74,7 @@ public class ShowUtils {
 
         // 读取文件的正确操作
         String            listPath = classPath + "list.md";
+//        String            listPath = classPath + "写作模板.md";
         ArrayList<String> listArr  = fu.read2Array(listPath, "UTF-8");
 
         // System.out.println(arr.size());
@@ -90,6 +91,7 @@ public class ShowUtils {
 
         // 列表的序列化与反序列化
         serPath = classPath + "list.txt";
+//        serPath = classPath + "写作模板.txt";
         fu.serialize(li, serPath);
         System.out.println("-----------列表测试序列化:finish--------------");
 

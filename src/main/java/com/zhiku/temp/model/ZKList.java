@@ -94,6 +94,30 @@ public class ZKList implements Serializable {
     public void setListtxt(ArrayList<String> listtxt) {
         this.listtxt = listtxt;
     }
+
+    public String toHtml(){
+        StringBuilder html = new StringBuilder();
+        //增加<ul> </ul>
+        html.append("<ul>");
+        html.append("\n");
+        for (String row:listtxt){
+            //增加<li> 元素 </li>
+            html.append("<li>");
+            html.append(row);
+            html.append("</li>");
+            //换行
+            html.append("\n");
+        }
+        html.append("</ul>");
+        //换行
+        html.append("\n");
+        return html.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toHtml();
+    }
 }
 
 

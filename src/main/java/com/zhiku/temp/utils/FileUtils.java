@@ -93,12 +93,27 @@ public class FileUtils {
      * @param path
      * @throws IOException
      */
-    public void serialize(Object obj, String path) throws IOException {
+    public  void serialize(Object obj, String path) throws IOException {//多个线程可能要调用同一文件名，方法不能并非执行
         ObjectOutputStream oo = new ObjectOutputStream(new FileOutputStream(new File(path)));
 
         oo.writeObject(obj);
         System.out.println("序列化成功！");
         oo.close();
+    }
+    //转字符串
+    public static String TabList2Str(Object obj, String path) throws IOException {
+        FileUtils fu = new FileUtils();
+        fu.serialize(obj, path);
+        String str=null;
+        File file=new File(path);
+        FileInputStream in=new FileInputStream(file);
+        // size 为字串的长度 ，这里一次性读完
+        int size=in.available();
+        byte[] buffer=new byte[size];
+        in.read(buffer);
+        in.close();
+        str=new String(buffer,"GB2312");//读文件字符集，写文件也需要这种字符集
+        return str;
     }
 }
 

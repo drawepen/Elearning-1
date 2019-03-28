@@ -120,6 +120,34 @@ public class Table implements Serializable {
     public void setTable(ArrayList<String[]> table) {
         this.table = table;
     }
+
+    public String toHtml(){
+        StringBuilder html = new StringBuilder();
+        //增加<table border="1">
+        html.append("<table border=\"1\">");
+        html.append("\n");
+        for (String[] row : table){
+            //增加一行<tr> </tr>
+            html.append("<tr>");
+            for (String col : row){
+                //增加这一行中的每个元素<td>元素</td>
+                html.append("<td>");
+                html.append(col);
+                html.append("</td>");
+                html.append("\n");
+            }
+            html.append("</tr>");
+            html.append("\n");
+        }
+        return html.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toHtml();
+    }
+
+
 }
 
 

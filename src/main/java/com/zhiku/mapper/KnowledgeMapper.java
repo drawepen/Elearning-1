@@ -1,6 +1,7 @@
 package com.zhiku.mapper;
 
 import com.zhiku.entity.Knowledge;
+import org.apache.ibatis.annotations.Param;
 
 public interface KnowledgeMapper {
     int deleteByPrimaryKey(Integer kid);
@@ -14,4 +15,7 @@ public interface KnowledgeMapper {
     int updateByPrimaryKeySelective(Knowledge record);
 
     int updateByPrimaryKey(Knowledge record);
+
+    //
+    Integer selectKnowledgeID(@Param( "knowledgeName" ) String knowledgeName , @Param( "knowledgeSection" ) Integer knowledgeSection);
 }

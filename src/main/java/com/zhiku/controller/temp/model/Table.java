@@ -1,6 +1,6 @@
-package com.zhiku.temp.model;
+package com.zhiku.controller.temp.model;
 
-import com.zhiku.temp.utils.TableUtils;
+import com.zhiku.controller.temp.utils.TableUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;

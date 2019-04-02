@@ -1,4 +1,4 @@
-package com.zhiku.temp;
+package com.zhiku.controller.temp;
 
 public class tempParagraph {
     public int id;

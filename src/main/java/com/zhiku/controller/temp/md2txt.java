@@ -1,4 +1,4 @@
-package com.zhiku.temp;
+package com.zhiku.controller.temp;
 
 import com.zhiku.entity.Knowledge;
 import com.zhiku.entity.Paragraph;
@@ -6,9 +6,9 @@ import com.zhiku.entity.Section;
 import com.zhiku.mapper.KnowledgeMapper;
 import com.zhiku.mapper.ParagraphMapper;
 import com.zhiku.mapper.SectionMapper;
-import com.zhiku.temp.model.Table;
-import com.zhiku.temp.model.ZKList;
-import com.zhiku.temp.utils.FileUtils;
+import com.zhiku.controller.temp.model.Table;
+import com.zhiku.controller.temp.model.ZKList;
+import com.zhiku.controller.temp.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -79,6 +79,9 @@ public class md2txt {
                 System.out.print( "\n"+tp.id+":<链接>:"+tp.getContent());
             }
         }
+
+//        saveParagraph(saveP,courseID);
+
     }
     public boolean findTableList(ArrayList<String> strArr,ArrayList<tempParagraph> saveP){
         int jid=0;
@@ -112,7 +115,7 @@ public class md2txt {
                 if(!istable){
                     firid=jid;//记第一个表格段
                 }
-                strA2.add(str0);
+                strA2.add(str0.trim());
                 istable=true;
             }else if(strs[ti].charAt( 0 )=='+'&&strs[ti].length()==1){//列表 "+ ",空格分割，+号只有一个字符
                 if(istable){
@@ -121,7 +124,7 @@ public class md2txt {
                 if(!islist){
                     firid=jid;//记第一个表格段
                 }
-                strA2.add(str0);
+                strA2.add(str0.trim());
                 islist=true;
             }else{
                 if(islist){
@@ -196,6 +199,10 @@ public class md2txt {
         return true;
     }
     public boolean saveParagraph(ArrayList<tempParagraph> saveP,Integer courseID){
+        Section section=new Section();
+        Knowledge knowledge=new Knowledge();
+        Paragraph paragraph=new Paragraph();
+        int ji=0;
         for(tempParagraph tp:saveP){
             //序号
             int secseq=1;
@@ -205,73 +212,48 @@ public class md2txt {
             int secid=-1;
             int konwid=-1;
             if(tp.getContent()==null){
-            }else if(tp.getType()==type[0]){//章
-                Section sec=new Section();
-                sec.setSectionCourse( courseID );
-                sec.setSectionName( tp.getContent() );
-                sec.setSectionSeq( ""+secseq++ );
-                sectionMapper.insertSelective(sec);
+            }else if(tp.getType()==type[0]||tp.getType()==type[1]){//章或节
+                section.setSectionCourse( courseID );
+                section.setSectionName( tp.getContent() );
+                section.setSectionSeq( ""+secseq++ );
+                sectionMapper.insertSelective(section);
                 knowseq=1;
                 pagseq=1;
-            }else if(tp.getType()==type[1]){//节
-                Section sec=new Section();
-                sec.setSectionCourse( courseID );
-                sec.setSectionName( tp.getContent() );
-                sec.setSectionSeq( ""+secseq++ );
-                sectionMapper.insertSelective(sec);
-                knowseq=1;
-                pagseq=1;
+                secid=sectionMapper.selectSectionID(section.getSectionName(),section.getSectionCourse());
+                konwid=-1;//上一个知识点id不可使用
             }else if(tp.getType()==type[2]){//知识点
-                Knowledge knowledge=new Knowledge();
                 knowledge.setKnowledgeName( tp.getContent());
                 knowledge.setKnowledgeSection(secid);
                 knowledge.setKnowledgeSeq( knowseq++ );
                 knowledgeMapper.insertSelective(knowledge);
                 pagseq=1;
-            }else if(tp.getType()==type[3]){//段落
-                Paragraph paragraph=new Paragraph();
+                konwid=knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeName(),knowledge.getKnowledgeSection() );
+            }else{//段落
+                if(konwid==-1){//这个段落没有知识点,储存节为知识点
+                    knowledge.setKnowledgeName( saveP.get(ji-1).getContent());
+                    knowledge.setKnowledgeSection(secid);
+                    knowledge.setKnowledgeSeq( knowseq++ );
+                    knowledgeMapper.insertSelective(knowledge);
+                    pagseq=1;
+                    konwid=knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeName(),knowledge.getKnowledgeSection() );
+                }
                 paragraph.setParagraphType( ""+tp.getType() );
                 paragraph.setParagraphContent( tp.getContent() );
                 paragraph.setParagraphKnowledge( konwid );
                 paragraph.setParagraphSeq( pagseq++ );
+                if(tp.getType()==type[6]||tp.getType()==type[8]||tp.getType()==type[9]){
+                    paragraph.setParagraphNewline("false");
+                }else{
+                    paragraph.setParagraphNewline( "true" );
+                }
                 paragraphMapper.insertSelective( paragraph );
             }
-//            else if(tp.getType()==type[4]){
-//                Paragraph paragraph=new Paragraph();
-//                paragraph.setParagraphType( ""+tp.getType() );
-//                paragraph.setParagraphContent( tp.getContent() );
-//                paragraph.setParagraphKnowledge( konwid );
-//                paragraph.setParagraphSeq( pagseq++ );
-//                paragraphMapper.insertSelective( paragraph );
-//                System.out.print( "\n"+tp.id+":<表格>:"+tp.getContent());
-//            }else if(tp.getType()==type[5]){
-//                System.out.print( "\n"+tp.id+":<列表>:"+tp.getContent());
-//            }else if(tp.getType()==type[7]){
-//                System.out.print( "\n"+tp.id+":<段落>:"+tp.getContent());
-//            }else if(tp.getType()==type[6]){//脚注
-//                System.out.print( "[<"+tp.getContent()+">]");
-//            }else if(tp.getType()==type[8]){//不换行
-//                System.out.print(tp.getContent());
-//            }else if(tp.getType()==type[9]){
-//                System.out.print( "\n"+tp.id+":<链接>:"+tp.getContent());
-//            }
+            ji++;
         }
         return true;
     }
     public static void main(String arg[]) throws IOException {
         new md2txt().toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",123);
-//        String str1=" 123 ";
-//        String str2=str1.trim();
-//        str2+="1";
-//        ArrayList<String> s=new ArrayList<>(  );
-//        s.add("123");
-//        for(String str:s)
-//        {
-//            str+="12";
-//            System.out.println( s.get(0));
-//            System.out.println( str);
-//        }
-
     }
 }
 class SortById implements Comparator {

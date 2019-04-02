@@ -3,7 +3,7 @@ package com.zhiku.entity;
 public class Knowledge {
     private Integer kid;
 
-    private Integer knowledgeSeq;
+    private Integer knowledgeSeq;//cccsskkppp
 
     private String knowledgeName;
 

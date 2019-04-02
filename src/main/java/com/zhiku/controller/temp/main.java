@@ -1,6 +1,6 @@
-package com.zhiku.temp;
+package com.zhiku.controller.temp;
 
-import com.zhiku.temp.utils.ShowUtils;
+import com.zhiku.controller.temp.utils.ShowUtils;
 
 import java.io.IOException;
 

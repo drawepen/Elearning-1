@@ -84,4 +84,10 @@
   <resultMap id="KnowledgeView" type="com.zhiku.view.KnowledgeView" extends="BaseResultMap">
     <collection property="paragraphs" resultMap="com.zhiku.mapper.ParagraphMapper.ResultMapWithBLOBs"/>
   </resultMap>
+
+  <select id="selectKnowledgeID" resultType="java.lang.Integer">
+    select kid
+    from knowledge
+    where knowledge_name = #{knowledgeName,jdbcType=VARCHAR},and knowledge_section = #{knowledgeSection,jdbcType=INTEGER}
+  </select>
 </mapper>

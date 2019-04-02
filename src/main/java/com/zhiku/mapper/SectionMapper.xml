@@ -101,4 +101,11 @@
     from section ,knowledge ,paragraph
     where sid = #{sid} and section.sid = knowledge.knowledge_section and knowledge.kid = paragraph.paragraph_knowledge order by paragraph_seq
   </select>
+
+  <select id="selectSectionID" resultType="java.lang.Integer">
+          select sid
+          from section
+          where section_name = #{sectionName,jdbcType=VARCHAR},and section_course = #{sectionCourse,jdbcType=INTEGER}
+  </select>
+
 </mapper>

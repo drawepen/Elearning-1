@@ -1,7 +1,7 @@
-package com.zhiku.temp.utils;
+package com.zhiku.controller.temp.utils;
 
-import com.zhiku.temp.model.Table;
-import com.zhiku.temp.model.ZKList;
+import com.zhiku.controller.temp.model.Table;
+import com.zhiku.controller.temp.model.ZKList;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class FileUtils {
         byte[] buffer=new byte[size];
         in.read(buffer);
         in.close();
-        str=new String(buffer,"GB2312");//读文件字符集，写文件也需要这种字符集
+        str=new String(buffer,"UTF-8");//读文件字符集，写文件也需要这种字符集
         return str;
     }
 }

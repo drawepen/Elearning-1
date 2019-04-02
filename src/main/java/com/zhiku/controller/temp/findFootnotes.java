@@ -1,4 +1,4 @@
-package com.zhiku.temp;
+package com.zhiku.controller.temp;
 
 import java.util.ArrayList;
 //class findFootnotes {

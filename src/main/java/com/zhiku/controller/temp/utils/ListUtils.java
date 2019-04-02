@@ -1,6 +1,6 @@
-package com.zhiku.temp.utils;
+package com.zhiku.controller.temp.utils;
 
-import com.zhiku.temp.model.ZKList;
+import com.zhiku.controller.temp.model.ZKList;
 
 import java.util.ArrayList;
 

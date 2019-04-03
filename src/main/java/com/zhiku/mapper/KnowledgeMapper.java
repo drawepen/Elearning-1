@@ -17,5 +17,5 @@ public interface KnowledgeMapper {
     int updateByPrimaryKey(Knowledge record);
 
     //
-    Integer selectKnowledgeID(@Param( "knowledgeName" ) String knowledgeName , @Param( "knowledgeSection" ) Integer knowledgeSection);
+    Integer selectKnowledgeID(@Param( "knowledgeSeq" ) Integer knowledgeSeq);
 }

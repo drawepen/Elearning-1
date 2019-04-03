@@ -88,6 +88,6 @@
   <select id="selectKnowledgeID" resultType="java.lang.Integer">
     select kid
     from knowledge
-    where knowledge_name = #{knowledgeName,jdbcType=VARCHAR},and knowledge_section = #{knowledgeSection,jdbcType=INTEGER}
+    where knowledge_seq = #{knowledgeSeq,jdbcType=INTEGER}
   </select>
 </mapper>

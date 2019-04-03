@@ -1,4 +1,4 @@
-package com.zhiku.controller.temp;
+package com.zhiku.service.temp;
 
 import java.util.ArrayList;
 //class findFootnotes {
@@ -70,7 +70,7 @@ public class findFootnotes {
                 } else if (str0.charAt( i ) == '[' && i < str0.length() - 1 && str0.charAt( i + 1 ) == '^') {//[^入堆
                     if (!tempstr.equals( "" )) {//储存文本
                         if(tempstr.equals(strs[0])){//最开头文本，换行文本
-                            nowfooth.next=new findFootnotes( jid,md2txt.type[7], tempstr, null );
+                            nowfooth.next=new findFootnotes( jid, md2txt.type[7], tempstr, null );
                             nowfooth=nowfooth.next;
 //                            saveP.add( new tempParagraph( jid,md2txt.type[7] , tempstr ) );
                         }else{//脚注后面，不换行文本

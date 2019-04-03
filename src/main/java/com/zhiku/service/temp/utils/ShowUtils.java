@@ -1,7 +1,7 @@
-package com.zhiku.controller.temp.utils;
+package com.zhiku.service.temp.utils;
 
-import com.zhiku.controller.temp.model.Table;
-import com.zhiku.controller.temp.model.ZKList;
+import com.zhiku.service.temp.model.Table;
+import com.zhiku.service.temp.model.ZKList;
 
 import java.io.IOException;
 import java.util.ArrayList;

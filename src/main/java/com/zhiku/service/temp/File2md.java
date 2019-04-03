@@ -1,4 +1,4 @@
-package com.zhiku.controller.temp;
+package com.zhiku.service.temp;
 
 import java.io.*;
 import java.sql.Connection;
@@ -257,7 +257,7 @@ public class File2md {
                         i++;
 //                        System.out.print("link    ");
 //                        System.out.println(link);
-                        saveP.add(new tempParagraph( jid,md2txt.type[9],link ));
+                        saveP.add(new tempParagraph( jid, md2txt.type[9],link ));
                         link = "";
                     }
                     unlink += s.charAt(i);

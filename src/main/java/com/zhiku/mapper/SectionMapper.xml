@@ -107,5 +107,10 @@
           from section
           where section_course = #{sectionCourse,jdbcType=INTEGER}
   </select>
+  <select id="selectSectionID" resultType="java.lang.Integer">
+    select ifnull(sid,0)
+    from section
+    where section_course = #{sectionCourse,jdbcType=INTEGER} and section_name=#{sectionName,jdbcType=VARCHAR}
+  </select>
 
 </mapper>

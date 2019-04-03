@@ -1,6 +1,6 @@
-package com.zhiku.service.temp.model;
+package com.zhiku.service.md2Database.model;
 
-import com.zhiku.service.temp.utils.TableUtils;
+import com.zhiku.service.md2Database.utils.TableUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;

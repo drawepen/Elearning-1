@@ -1,7 +1,7 @@
 package com.zhiku.controller;
 
 import com.zhiku.mapper.SectionMapper;
-import com.zhiku.service.temp.md2Pag;
+import com.zhiku.service.md2Database.md2Pag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +23,8 @@ public class test_md {
 //        course.setSectionSeq("10401" );
 //        course.setSectionCourse( 104 );
 //        int konwid=sectionMapper.selectSectionMaxID(104);
-        md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",104,104);
-//        System.out.println( "查询《《《《"+konwid );
+        String errorstr=md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",104,104);
+        System.out.println( "返回《《《《"+errorstr );
         return "login";
     }
 }

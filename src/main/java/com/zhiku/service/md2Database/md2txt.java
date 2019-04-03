@@ -1,4 +1,4 @@
-package com.zhiku.service.temp;
+package com.zhiku.service.md2Database;
 
 import com.zhiku.entity.Knowledge;
 import com.zhiku.entity.Paragraph;
@@ -7,9 +7,9 @@ import com.zhiku.mapper.CourseMapper;
 import com.zhiku.mapper.KnowledgeMapper;
 import com.zhiku.mapper.ParagraphMapper;
 import com.zhiku.mapper.SectionMapper;
-import com.zhiku.service.temp.model.Table;
-import com.zhiku.service.temp.model.ZKList;
-import com.zhiku.service.temp.utils.FileUtils;
+import com.zhiku.service.md2Database.model.Table;
+import com.zhiku.service.md2Database.model.ZKList;
+import com.zhiku.service.md2Database.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -262,7 +262,7 @@ public class md2txt {
                 if(tp.getType()==type[6]||tp.getType()==type[8]||tp.getType()==type[9]){
                     paragraph.setParagraphNewline("n");
                 }else{
-                paragraph.setParagraphNewline( "y" );
+                    paragraph.setParagraphNewline( "y" );
                 }
                 md2txtUtils.paragraphMapper.insert( paragraph );
             }

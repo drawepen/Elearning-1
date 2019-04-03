@@ -1,7 +1,7 @@
-package com.zhiku.service.temp.utils;
+package com.zhiku.service.md2Database.utils;
 
-import com.zhiku.service.temp.model.Table;
-import com.zhiku.service.temp.model.ZKList;
+import com.zhiku.service.md2Database.model.Table;
+import com.zhiku.service.md2Database.model.ZKList;
 
 import java.io.*;
 import java.util.ArrayList;

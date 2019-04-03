@@ -1,6 +1,6 @@
-package com.zhiku.service.temp.utils;
+package com.zhiku.service.md2Database.utils;
 
-import com.zhiku.service.temp.model.ZKList;
+import com.zhiku.service.md2Database.model.ZKList;
 
 import java.util.ArrayList;
 

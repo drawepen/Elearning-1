@@ -1,4 +1,4 @@
-package com.zhiku.service.temp;
+package com.zhiku.service.md2Database;
 
 import com.zhiku.entity.Knowledge;
 import com.zhiku.entity.Paragraph;
@@ -7,7 +7,7 @@ import com.zhiku.mapper.CourseMapper;
 import com.zhiku.mapper.KnowledgeMapper;
 import com.zhiku.mapper.ParagraphMapper;
 import com.zhiku.mapper.SectionMapper;
-import com.zhiku.service.temp.utils.FileUtils;
+import com.zhiku.service.md2Database.utils.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +20,13 @@ public class md2Pag {
      * |0|#|21|
      * |1|##|22|
      * |2|###|23|
-     * |3|图片|30|
-     * |4|表格|40|
-     * |5|列表|50|
+     * |3|图片|'I'|
+     * |4|表格|'T'|
+     * |5|列表|'L'|
      * |6|脚注|60|
-     * |7|换行文本|71|
+     * |7|换行文本|'P'|
      * |8|不换行文本|72|
-     * |9|链接|80|
+     * |9|代码块|'C'|
      * content==null表示在其他段中合并储存
      */
     @Autowired
@@ -37,21 +37,28 @@ public class md2Pag {
     private KnowledgeMapper knowledgeMapper;
     @Autowired
     private ParagraphMapper paragraphMapper;
-    public static char[] type={21,22,23,30,40,50,60,71,72,80};
+    public static char[] type={21,22,23,'I','T','L',60,'P',72,'C'};
     private static md2Pag md2pagUtils;
     @PostConstruct
     public void init() {
         md2pagUtils = this;
     }
-    public static void toolRun(String filePath,Integer courseID,Integer courseSeq) throws IOException {
+    public static String toolRun(String filePath,Integer courseID,Integer courseSeq) throws IOException {
         //读取文件
         FileUtils fu = new FileUtils();
         ArrayList<String> strArr = fu.read2Array(filePath, "UTF-8");
         ArrayList<tempParagraph> saveP=new ArrayList<tempParagraph>( );
-        //识别表格、列表、标题
-        findType( strArr,saveP );
+        String errorstr;
+        //识别表格、列表、标题、图片、代码块
+        errorstr=findType( strArr,saveP );
+        if(errorstr!=null){
+            return errorstr;
+        }
         //储存
-        saveParagraph(saveP,courseID,courseSeq);
+        errorstr=saveParagraph(saveP,courseID,courseSeq);
+        if(errorstr!=null){
+            return errorstr;
+        }
         //test
         for(tempParagraph tp:saveP){
             if(tp.getContent()==null){
@@ -74,83 +81,104 @@ public class md2Pag {
             }else if(tp.getType()==type[8]){//不换行
                 System.out.print(tp.getContent());
             }else if(tp.getType()==type[9]){
-                System.out.print( "\n"+tp.id+":<链接>:"+tp.getContent());
+                System.out.print( "\n"+tp.id+":<代码块>:"+tp.getContent());
             }
         }
+        return null;//返回null表示没有问题
     }
-    public static boolean findType(ArrayList<String> strArr, ArrayList<tempParagraph> saveP){
+    public static String findType(ArrayList<String> strArr, ArrayList<tempParagraph> saveP){
         int jid=0;
-        int firid = 0;
-        boolean islist=false,istable=false;
+        boolean islist=false,istable=false,iscode=false;
         //标题对应的标志
-        String title_1 = "# ",title_2 = "## ",title_3 = "### ";
+        String title_1 = "# ",title_2 = "## ",title_3 = "### ",image="![",code="```";
         ArrayList<String> strA2=new ArrayList<String> ();
         for(String str0:strArr){
             jid++;
             String strp=str0.trim();
             if(strp.equals( "" )){
-//                saveP.add(new tempParagraph(jid,md2Pag.type[7],str0));
                 continue;
-            }else if (strp.startsWith(title_3)) {//知识点
+            }else if(strp.startsWith(code)){//代码块
                 if(istable){
-                    saveTabList(strA2,saveP,md2Pag.type[4],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
                 }else if(islist){
-                    saveTabList(strA2,saveP,md2Pag.type[5],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
+                    islist=false;
+                }
+                strA2.add(str0);
+                if(iscode){
+                    saveTabListCode(strA2,saveP,md2Pag.type[9],jid);
+                    iscode=false;
+                }else{
+                    iscode=true;
+                }
+            }else if(iscode){//如果不是代码块终结符，任何字符串都是代码，其他类型不需要检测
+                strA2.add(str0);
+            }else if (strp.startsWith(title_3)) {//知识点
+                if(istable){
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
+                    istable=false;
+                }else if(islist){
+                    saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
                 saveP.add(new tempParagraph(jid,md2Pag.type[2],str0));
 
             }else if(strp.startsWith(title_2)){//节##
                 if(istable){
-                    saveTabList(strA2,saveP,md2Pag.type[4],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
                 }else if(islist){
-                    saveTabList(strA2,saveP,md2Pag.type[5],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
                 saveP.add(new tempParagraph(jid,md2Pag.type[1],str0));
             }else if(strp.startsWith(title_1)){//节#
                 if(istable){
-                    saveTabList(strA2,saveP,md2Pag.type[4],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
                 }else if(islist){
-                    saveTabList(strA2,saveP,md2Pag.type[5],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
                 saveP.add(new tempParagraph(jid,md2Pag.type[0],str0));
+            }else if(strp.startsWith(image)){//图片
+                if(istable){
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
+                    istable=false;
+                }else if(islist){
+                    saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
+                    islist=false;
+                }
+                saveP.add(new tempParagraph(jid,md2Pag.type[3],str0));
             }else if(strp.charAt( 0 )=='|'){//表格
                 if(islist){
-//                    savelist=true;
-                    saveTabList(strA2,saveP,md2Pag.type[5],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
                 strA2.add(str0);
                 istable=true;
             }else if(strp.length()>1&&strp.charAt( 0 )=='+'&&strp.charAt( 1 )==' '){//列表
                 if(istable){
-//                    savetable=true;
-                    saveTabList(strA2,saveP,md2Pag.type[4],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
                 }
                 strA2.add(str0);
                 islist=true;
             }else{//普通段落
                 if(islist){
-//                    savelist=true;
-                    saveTabList(strA2,saveP,md2Pag.type[5],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                 }else if(istable){
-//                    savetable=true;
-                    saveTabList(strA2,saveP,md2Pag.type[4],jid);
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                 }
                 islist=false;
                 istable=false;
                 saveP.add(new tempParagraph(jid,md2Pag.type[7],str0));
             }
         }
-        return true;
+        return null;
     }
-    private static void saveTabList(ArrayList<String> strA2,ArrayList<tempParagraph> saveP,char typec,int jid){
+    private static void saveTabListCode(ArrayList<String> strA2, ArrayList<tempParagraph> saveP, char typec, int jid){
         int l=strA2.size();
         if(l<1)
             return;
@@ -161,7 +189,7 @@ public class md2Pag {
         saveP.add(new tempParagraph(jid,typec,str));
         strA2.clear();
     }
-    public static boolean saveParagraph(ArrayList<tempParagraph> saveP,Integer courseID,Integer courseSeq){
+    public static String saveParagraph(ArrayList<tempParagraph> saveP,Integer courseID,Integer courseSeq){
         Section section=new Section();
         Knowledge knowledge=new Knowledge();
         Paragraph paragraph=new Paragraph();
@@ -170,6 +198,13 @@ public class md2Pag {
         int secseq=md2pagUtils.sectionMapper.selectSectionMaxID(courseID);
         if(secseq==0){
             secseq=courseSeq*100;
+        }else{//查重
+            for(tempParagraph tp:saveP){
+                if((tp.getType()==type[1]||tp.getType()==type[0])&&
+                        md2pagUtils.sectionMapper.selectSectionID(tp.getContent(),courseID)!=0){
+                    return "error:文件与数据库中章节有重复！请检测文件或先清空原课程数据。";
+                }
+            }
         }
         int knowseq=0;
         int pagseq=0;
@@ -184,7 +219,7 @@ public class md2Pag {
                 section.setSectionCourse( courseID );
                 section.setSectionName( tp.getContent() );
                 section.setSectionSeq( ""+secseq );
-                section.setSectionRecommendPath( "not knower" );////////////////////
+                section.setSectionRecommendPath( secseq+".txt" );////////////////////
                 md2pagUtils.sectionMapper.insert(section);
                 knowseq=0;
                 pagseq=0;
@@ -203,11 +238,12 @@ public class md2Pag {
                         ji++;
                         continue;
                     }
-                    if(saveP.get(ji-1).getType()==type[1]){
-                        knowledge.setKnowledgeName( "#"+saveP.get(ji-1).getContent());//补成三级标题
-                    }else{
-                        knowledge.setKnowledgeName( "##"+saveP.get(ji-1).getContent());
-                    }
+//                    if(saveP.get(ji-1).getType()==type[1]){
+//                        knowledge.setKnowledgeName( "#"+saveP.get(ji-1).getContent());//补成三级标题
+//                    }else{
+//                        knowledge.setKnowledgeName( "##"+saveP.get(ji-1).getContent());
+//                    }
+                    knowledge.setKnowledgeName( "");
                     knowledge.setKnowledgeSection(secid);
                     knowledge.setKnowledgeSeq(  secseq*100+(++knowseq) );
                     md2pagUtils.knowledgeMapper.insert(knowledge);
@@ -227,7 +263,7 @@ public class md2Pag {
             }
             ji++;
         }
-        return true;
+        return null;
     }
     public static void main(String arg[]) throws IOException {
         md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",102,101);

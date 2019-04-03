@@ -212,49 +212,57 @@ public class md2txt {
         Paragraph paragraph=new Paragraph();
         int ji=0;
         //序号
-        int secseq=1;
-        int knowseq=1;
-        int pagseq=1;
+        int secseq=md2txtUtils.sectionMapper.selectSectionMaxID(courseID);
+        if(secseq==0){
+            secseq=courseSeq*100;
+        }
+        int knowseq=0;
+        int pagseq=0;
         //id
         int secid=-1;
         int knowid=-1;
+
         for(tempParagraph tp:saveP){
             if(tp.getContent()==null){
-            }else if(tp.getType()==type[0]||tp.getType()==type[1]){//章或节
-                section.setSid( courseSeq*100+secseq++ );
+            }else if(tp.getType()==type[1]||tp.getType()==type[0]){//章或节
+                section.setSid( ++secseq );
                 section.setSectionCourse( courseID );
                 section.setSectionName( tp.getContent() );
-                section.setSectionSeq( ""+courseSeq*100+secseq );
+                section.setSectionSeq( ""+secseq );
                 section.setSectionRecommendPath( "not knower" );////////////////////
                 md2txtUtils.sectionMapper.insert(section);
-                knowseq=1;
-                pagseq=1;
-                secid=courseSeq*100+secseq;
+                knowseq=0;
+                pagseq=0;
+                secid=secseq;
                 knowid=-1;//上一个知识点id不可使用
             }else if(tp.getType()==type[2]){//知识点
                 knowledge.setKnowledgeName( tp.getContent());
                 knowledge.setKnowledgeSection(secid);
-                knowledge.setKnowledgeSeq( courseSeq*10000+secseq*100+knowseq++ );
+                knowledge.setKnowledgeSeq( secseq*100+(++knowseq) );
                 md2txtUtils.knowledgeMapper.insert(knowledge);
-                pagseq=1;
+                pagseq=0;
                 knowid=md2txtUtils.knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeSeq() );
             }else{//段落
                 if(knowid==-1){//这个段落没有知识点,储存节为知识点
-                    knowledge.setKnowledgeName( saveP.get(ji-1).getContent());
+                    if(ji==0){//无效段落
+                        ji++;
+                        continue;
+                    }
+                    knowledge.setKnowledgeName( saveP.get(ji-1).getContent());//补成三级标题
                     knowledge.setKnowledgeSection(secid);
-                    knowledge.setKnowledgeSeq(  courseSeq*10000+secseq*100+knowseq++ );
+                    knowledge.setKnowledgeSeq(  secseq*100+(++knowseq) );
                     md2txtUtils.knowledgeMapper.insert(knowledge);
-                    pagseq=1;
+                    pagseq=0;
                     knowid=md2txtUtils.knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeSeq());
                 }
                 paragraph.setParagraphType( ""+tp.getType() );
                 paragraph.setParagraphContent( tp.getContent() );
                 paragraph.setParagraphKnowledge( knowid );
-                paragraph.setParagraphSeq( courseSeq*10000000+secseq*100000+knowseq*1000+pagseq++ );
+                paragraph.setParagraphSeq( secseq*100000+knowseq*1000+(++pagseq) );
                 if(tp.getType()==type[6]||tp.getType()==type[8]||tp.getType()==type[9]){
                     paragraph.setParagraphNewline("n");
                 }else{
-                    paragraph.setParagraphNewline( "y" );
+                paragraph.setParagraphNewline( "y" );
                 }
                 md2txtUtils.paragraphMapper.insert( paragraph );
             }

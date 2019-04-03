@@ -1,6 +1,6 @@
 package com.zhiku.controller;
 
-import com.zhiku.mapper.KnowledgeMapper;
+import com.zhiku.mapper.SectionMapper;
 import com.zhiku.service.temp.md2Pag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,7 +11,7 @@ import java.io.IOException;
 @Controller
 public class test_md {
     @Autowired
-    private KnowledgeMapper knowledgeMapper;
+    private SectionMapper sectionMapper;
     @RequestMapping(value = "testmd")
     public String testmd() throws IOException {
         System.out.println( "输出《《《《《《《《》》》》》》》》》》" );
@@ -22,7 +22,7 @@ public class test_md {
 //        course.setSectionRecommendPath( "a/c.txt" );
 //        course.setSectionSeq("10401" );
 //        course.setSectionCourse( 104 );
-//        int konwid=knowledgeMapper.selectKnowledgeID(course.getKnowledgeSeq());
+//        int konwid=sectionMapper.selectSectionMaxID(104);
         md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",104,104);
 //        System.out.println( "查询《《《《"+konwid );
         return "login";

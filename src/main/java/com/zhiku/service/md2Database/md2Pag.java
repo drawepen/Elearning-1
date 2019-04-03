@@ -105,7 +105,7 @@ public class md2Pag {
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
-                strA2.add(str0);
+                strA2.add(strp);
                 if(iscode){
                     saveTabListCode(strA2,saveP,md2Pag.type[9],jid);
                     iscode=false;
@@ -156,14 +156,14 @@ public class md2Pag {
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
-                strA2.add(str0);
+                strA2.add(strp);
                 istable=true;
             }else if(strp.length()>1&&strp.charAt( 0 )=='+'&&strp.charAt( 1 )==' '){//列表
                 if(istable){
                     saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
                 }
-                strA2.add(str0);
+                strA2.add(strp);
                 islist=true;
             }else{//普通段落
                 if(islist){

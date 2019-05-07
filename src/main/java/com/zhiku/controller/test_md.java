@@ -14,7 +14,7 @@ public class test_md {
     private SectionMapper sectionMapper;
     @RequestMapping(value = "testmd")
     public String testmd() throws IOException {
-        System.out.println( "输出《《《《《《《《》》》》》》》》》》" );
+//        System.out.println( "输出《《《《《《《《》》》》》》》》》》" );
 //        Knowledge course=new Knowledge();
 //        course.setKnowledgeSeq(1040201);
 ////        course.setSid( 10401 );
@@ -22,9 +22,9 @@ public class test_md {
 //        course.setSectionRecommendPath( "a/c.txt" );
 //        course.setSectionSeq("10401" );
 //        course.setSectionCourse( 104 );
-//        int konwid=sectionMapper.selectSectionMaxID(104);
-        String errorstr=md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",104,104);
-        System.out.println( "返回《《《《"+errorstr );
+//        List<Integer> konwid=sectionMapper.selectSectionMaxID(104);//如果sql返回结果有多个，接口不用LIst会报错
+        String errorstr= md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",104,104);
+//        System.out.println( "返回《《《《"+konwid );
         return "login";
     }
 }

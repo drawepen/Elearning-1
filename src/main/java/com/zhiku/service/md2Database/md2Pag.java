@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
+
 @Service
 public class md2Pag {
     /***********i|type|char*******************
@@ -202,7 +203,7 @@ public class md2Pag {
             for(tempParagraph tp:saveP){
                 if((tp.getType()==type[1]||tp.getType()==type[0])&&
                         md2pagUtils.sectionMapper.selectSectionID(tp.getContent(),courseID)!=0){
-                    return "error:文件与数据库中章节有重复！请检测文件或先清空原课程数据。";
+                    return "error:文件内容与数据库中章节有重复！请检测文件或先清空原课程数据。";
                 }
             }
         }

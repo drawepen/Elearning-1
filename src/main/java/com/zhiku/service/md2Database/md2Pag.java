@@ -44,7 +44,8 @@ public class md2Pag {
     public void init() {
         md2pagUtils = this;
     }
-    public static String toolRun(String filePath,Integer courseID,Integer courseSeq) throws IOException {
+    public static String toolRun(String filePath,Integer courseID) throws IOException {
+        Integer courseSeq=courseID;
         //读取文件
         FileUtils fu = new FileUtils();
         ArrayList<String> strArr = fu.read2Array(filePath, "UTF-8");
@@ -60,31 +61,34 @@ public class md2Pag {
         if(errorstr!=null){
             return errorstr;
         }
-        //test
-        for(tempParagraph tp:saveP){
-            if(tp.getContent()==null){
-            }else if(tp.getType()==type[0]){
-                System.out.print( "\n"+tp.id+":<标题1>:"+tp.getContent());
-            }else if(tp.getType()==type[1]){
-                System.out.print( "\n"+tp.id+":<标题2>:"+tp.getContent());
-            }else if(tp.getType()==type[2]){
-                System.out.print( "\n"+tp.id+":<标题3>:"+tp.getContent());
-            }else if(tp.getType()==type[3]){
-                System.out.print( "\n"+tp.id+":<图片>:"+tp.getContent());
-            }else if(tp.getType()==type[4]){
-                System.out.print( "\n"+tp.id+":<表格>:"+tp.getContent());
-            }else if(tp.getType()==type[5]){
-                System.out.print( "\n"+tp.id+":<列表>:"+tp.getContent());
-            }else if(tp.getType()==type[7]){
-                System.out.print( "\n"+tp.id+":<段落>:"+tp.getContent());
-            }else if(tp.getType()==type[6]){//脚注
-                System.out.print( "[<"+tp.getContent()+">]");
-            }else if(tp.getType()==type[8]){//不换行
-                System.out.print(tp.getContent());
-            }else if(tp.getType()==type[9]){
-                System.out.print( "\n"+tp.id+":<代码块>:"+tp.getContent());
-            }
-        }
+//
+//        //test
+//        for(tempParagraph tp:saveP){
+//            if(tp.getContent()==null){
+//            }else if(tp.getType()==type[0]){
+//                System.out.print( "\n"+tp.id+":<标题1>:"+tp.getContent());
+//            }else if(tp.getType()==type[1]){
+//                System.out.print( "\n"+tp.id+":<标题2>:"+tp.getContent());
+//            }else if(tp.getType()==type[2]){
+//                System.out.print( "\n"+tp.id+":<标题3>:"+tp.getContent());
+//            }else if(tp.getType()==type[3]){
+//                System.out.print( "\n"+tp.id+":<图片>:"+tp.getContent());
+//            }else if(tp.getType()==type[4]){
+//                System.out.print( "\n"+tp.id+":<表格>:"+tp.getContent());
+//            }else if(tp.getType()==type[5]){
+//                System.out.print( "\n"+tp.id+":<列表>:"+tp.getContent());
+//            }else if(tp.getType()==type[7]){
+//                System.out.print( "\n"+tp.id+":<段落>:"+tp.getContent());
+//            }else if(tp.getType()==type[6]){//脚注
+//                System.out.print( "[<"+tp.getContent()+">]");
+//            }else if(tp.getType()==type[8]){//不换行
+//                System.out.print(tp.getContent());
+//            }else if(tp.getType()==type[9]){
+//                System.out.print( "\n"+tp.id+":<代码块>:"+tp.getContent());
+//            }
+//        }
+
+
         return null;//返回null表示没有问题
     }
     public static String findType(ArrayList<String> strArr, ArrayList<tempParagraph> saveP){
@@ -197,6 +201,7 @@ public class md2Pag {
         int ji=0;
         //序号
         int secseq=md2pagUtils.sectionMapper.selectSectionMaxID(courseID);
+        System.out.println("课程知识点序号"+secseq);////////////////////////////////////
         if(secseq==0){
             secseq=courseSeq*100;
         }else{//查重
@@ -227,12 +232,14 @@ public class md2Pag {
                 secid=secseq;
                 knowid=-1;//上一个知识点id不可使用
             }else if(tp.getType()==type[2]){//知识点
+                knowledge.setKid( null );
                 knowledge.setKnowledgeName( tp.getContent());
                 knowledge.setKnowledgeSection(secid);
                 knowledge.setKnowledgeSeq( secseq*100+(++knowseq) );
-                md2pagUtils.knowledgeMapper.insert(knowledge);
+                md2pagUtils.knowledgeMapper.insert_getid(knowledge);
                 pagseq=0;
-                knowid=md2pagUtils.knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeSeq() );
+//                knowid=md2pagUtils.knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeSeq() );
+                knowid=knowledge.getKid();
             }else{//段落
                 if(knowid==-1){//这个段落没有知识点,储存节为知识点
                     if(ji==0){//无效段落
@@ -244,12 +251,14 @@ public class md2Pag {
 //                    }else{
 //                        knowledge.setKnowledgeName( "##"+saveP.get(ji-1).getContent());
 //                    }
+                    knowledge.setKid( null );
                     knowledge.setKnowledgeName( "");
                     knowledge.setKnowledgeSection(secid);
                     knowledge.setKnowledgeSeq(  secseq*100+(++knowseq) );
-                    md2pagUtils.knowledgeMapper.insert(knowledge);
+                    md2pagUtils.knowledgeMapper.insert_getid(knowledge);
                     pagseq=0;
-                    knowid=md2pagUtils.knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeSeq());
+//                    knowid=md2pagUtils.knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeSeq());
+                    knowid=knowledge.getKid();
                 }
                 paragraph.setParagraphType( ""+tp.getType() );
                 paragraph.setParagraphContent( tp.getContent() );
@@ -266,7 +275,7 @@ public class md2Pag {
         }
         return null;
     }
-    public static void main(String arg[]) throws IOException {
-        md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",102,101);
-    }
+//    public static void main(String arg[]) throws IOException {
+//        md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",102,101);
+//    }
 }

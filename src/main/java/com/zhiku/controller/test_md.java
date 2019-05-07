@@ -23,8 +23,8 @@ public class test_md {
 //        course.setSectionSeq("10401" );
 //        course.setSectionCourse( 104 );
 //        List<Integer> konwid=sectionMapper.selectSectionMaxID(104);//如果sql返回结果有多个，接口不用LIst会报错
-        String errorstr= md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",104,104);
-//        System.out.println( "返回《《《《"+konwid );
+        String errorstr= md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",105);
+        System.out.println( "返回《《《《"+errorstr );
         return "login";
     }
 }

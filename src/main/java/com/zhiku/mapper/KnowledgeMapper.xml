@@ -26,6 +26,12 @@
     values (#{kid,jdbcType=INTEGER}, #{knowledgeSeq,jdbcType=INTEGER}, #{knowledgeName,jdbcType=VARCHAR}, 
       #{knowledgeSection,jdbcType=INTEGER})
   </insert>
+  <insert id="insert_getid" useGeneratedKeys="true" keyProperty="kid"  parameterType="com.zhiku.entity.Knowledge">
+    insert into knowledge (kid, knowledge_seq, knowledge_name,
+      knowledge_section)
+    values (#{kid,jdbcType=INTEGER}, #{knowledgeSeq,jdbcType=INTEGER}, #{knowledgeName,jdbcType=VARCHAR},
+      #{knowledgeSection,jdbcType=INTEGER})
+  </insert>
   <insert id="insertSelective" parameterType="com.zhiku.entity.Knowledge">
     insert into knowledge
     <trim prefix="(" suffix=")" suffixOverrides=",">

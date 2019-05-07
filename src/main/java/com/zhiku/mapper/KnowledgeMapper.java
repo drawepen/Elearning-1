@@ -8,6 +8,8 @@ public interface KnowledgeMapper {
 
     int insert(Knowledge record);
 
+    int insert_getid(Knowledge record);
+
     int insertSelective(Knowledge record);
 
     Knowledge selectByPrimaryKey(Integer kid);

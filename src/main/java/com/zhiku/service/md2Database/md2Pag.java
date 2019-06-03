@@ -61,7 +61,7 @@ public class md2Pag {
         if(errorstr!=null){
             return errorstr;
         }
-//
+
 //        //test
 //        for(tempParagraph tp:saveP){
 //            if(tp.getContent()==null){
@@ -87,30 +87,58 @@ public class md2Pag {
 //                System.out.print( "\n"+tp.id+":<代码块>:"+tp.getContent());
 //            }
 //        }
-
-
         return null;//返回null表示没有问题
     }
-    public static String findType(ArrayList<String> strArr, ArrayList<tempParagraph> saveP){
-        int jid=0;
-        boolean islist=false,istable=false,iscode=false;
+    //按CSDN编辑器的标准判断，不一定符合所有的morkdown标准
+    private static String findType(ArrayList<String> strArr, ArrayList<tempParagraph> saveP){
+        int jid=0;//行号
+        boolean islist=false,istable=false,iscode=false,
+                isendList=false,//普通段前一行为空或由+-*与空格交替存在为列表的最后一行
+                isstartTable=false;//表格是否开始，任何表格不连贯都判断为表格结束，所以不用记表格是否到了最后一行
         //标题对应的标志
         String title_1 = "# ",title_2 = "## ",title_3 = "### ",image="![",code="```";
+
         ArrayList<String> strA2=new ArrayList<String> ();
-        for(String str0:strArr){
-            jid++;
+        int strArrLength=strArr.size();
+        for(jid=1;jid<=strArrLength;jid++){
+            String str0=strArr.get( jid-1 );
             String strp=str0.trim();
-            if(strp.equals( "" )){
+            if(strp.equals( "" )){//按照CSDN编辑器，空行也能终结表格
+                if(istable){
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
+                    istable=false;isstartTable=false;
+                }
+                if(islist){
+                    strA2.add(str0);//空行对列表也有影响
+                }
+                isendList=true;
                 continue;
+            }
+            //判断是否是+-*与空格交替存在
+            boolean tempb=true;
+            String[] list_str=strp.split( " " );
+            for (String tstr:list_str){//不是空行没有纯空格，分割后一定有非空字符串集
+                if(!tstr.equals("")&&!tstr.equals("+")&&!tstr.equals("-")&&!tstr.equals("*")){
+                    tempb=false;
+                }
+            }
+            if(tempb){//可能只有一个+,所以不能放到列表内部判断，必须提前判断
+                if(istable){
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
+                    istable=false;isstartTable=false;
+                }
+                strA2.add(str0);//不是空行应该保存
+                islist=true;
+                isendList=true;
             }else if(strp.startsWith(code)){//代码块
                 if(istable){
                     saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
-                    istable=false;
+                    istable=false;isstartTable=false;
                 }else if(islist){
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
-                strA2.add(strp);
+                strA2.add(str0);
                 if(iscode){
                     saveTabListCode(strA2,saveP,md2Pag.type[9],jid);
                     iscode=false;
@@ -123,6 +151,7 @@ public class md2Pag {
                 if(istable){
                     saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
+                    isstartTable=false;
                 }else if(islist){
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
@@ -133,6 +162,7 @@ public class md2Pag {
                 if(istable){
                     saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
+                    isstartTable=false;
                 }else if(islist){
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
@@ -142,47 +172,133 @@ public class md2Pag {
                 if(istable){
                     saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
+                    isstartTable=false;
                 }else if(islist){
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
                 saveP.add(new tempParagraph(jid,md2Pag.type[0],str0));
+            }else if((strp.length()>1&&(strp.charAt( 0 )=='+'||strp.charAt( 0 )=='-'||strp.charAt( 0 )=='*')
+                    &&strp.charAt( 1 )==' ')||(islist&&!isendList)){//列表,判断顺序不能改，开头不是+-*的也可能是列表,所以先判断列表
+                if(istable){
+                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
+                    istable=false;
+                    isstartTable=false;
+                }
+                strA2.add(str0);
+                islist=true;
+                isendList=false;
             }else if(strp.startsWith(image)){//图片
                 if(istable){
                     saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
                     istable=false;
+                    isstartTable=false;
                 }else if(islist){
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
                 saveP.add(new tempParagraph(jid,md2Pag.type[3],str0));
-            }else if(strp.charAt( 0 )=='|'){//表格
+            }else if(isstartTable&&isHaveT( strp )){//表格
                 if(islist){
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                     islist=false;
                 }
-                strA2.add(strp);
+                strA2.add(str0);
                 istable=true;
-            }else if(strp.length()>1&&strp.charAt( 0 )=='+'&&strp.charAt( 1 )==' '){//列表
-                if(istable){
-                    saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
-                    istable=false;
-                }
-                strA2.add(strp);
-                islist=true;
-            }else{//普通段落
+            }else if(jid<strArrLength&&isStartTable(strp,strArr.get( jid ))){//是否即将有表格
                 if(islist){
                     saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
-                }else if(istable){
+                    islist=false;
+                }
+                strA2.add(str0);
+                istable=true;
+                isstartTable=true;
+
+            }else{//普通段落
+                if(istable){
                     saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
+                }else if(islist){
+                    saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
                 }
                 islist=false;
                 istable=false;
+                isstartTable=false;
                 saveP.add(new tempParagraph(jid,md2Pag.type[7],str0));
             }
+//            /////////////////////////////
+//            System.out.println( "<<<<<<<<<<<<<<<<<<<<<<<<<");
+//            System.out.println( str0 );
+//            System.out.println( strArr.get( jid ) );
+//
+//            System.out.println( "istable:"+istable );
+//            System.out.println( "islist:"+islist );
+//            System.out.println( "isstartTable:"+isstartTable );
+//            System.out.println( "isendList:"+isendList );
+//            System.out.println( ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" );
+//
+//            ///////////////////////////////////////
+        }
+        if(islist){
+            saveTabListCode(strA2,saveP,md2Pag.type[5],jid);
+            islist=false;
+        }else if(istable){
+            saveTabListCode(strA2,saveP,md2Pag.type[4],jid);
+            istable=false;
+            isstartTable=false;
         }
         return null;
     }
+
+    //是否开始表格
+    private static boolean isStartTable(String str1,String str2){
+        int t1=0;//第一个字符串'|'的个数
+        int l=str1.length();
+        for(int i=0;i<l;i++){
+            if(str1.charAt( i )=='|')
+                t1++;
+        }
+//        //按照CSDN编辑器，第一行'|'个数不能大于下一行"--"加一,但分割字符串开头为|自动多一个空值
+//        if(t1>strs2.length){
+//            return false;
+//        }
+        if(t1==0){//CSDN在表格判断中\|多了就转义，少了不转义，太复杂，这里只判断有一个‘|’就为表格
+            return false;
+        }
+
+        if(str2.trim().equals( "" ))
+            return false;
+        String[] strs2=str2.trim().split( "-" );
+        if(str2.length()==0)//只有全--才长度为0
+            return true;
+        for (String str : strs2) {
+            if (str.equals( "" ))
+                continue;
+            int l1 = str.length();
+            int j = 0;//记'|'个数
+            for (int i = 0; i < l1; i++) {
+                if (str.charAt( i ) == '|') {
+                    j++;
+                } else if (str.charAt( i ) != ' ') {//含非"|"或空格也不是表格
+                    return false;
+                }
+            }
+            if (j != 1) {//如果'|'个数小于1也不是表格
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //字符串中是否包含'|'，根据CSDN编辑器，只要有'|'，不管是不是'\|'转义的，都能继续表格，使用不判断是否转义
+    private static boolean isHaveT(String str){
+        int l=str.length();
+        for(int i=0;i<l;i++){
+            if(str.charAt( i )=='|')
+                return true;
+        }
+        return false;
+    }
+
     private static void saveTabListCode(ArrayList<String> strA2, ArrayList<tempParagraph> saveP, char typec, int jid){
         int l=strA2.size();
         if(l<1)
@@ -208,7 +324,7 @@ public class md2Pag {
             for(tempParagraph tp:saveP){
                 if((tp.getType()==type[1]||tp.getType()==type[0])&&
                         md2pagUtils.sectionMapper.selectSectionID(tp.getContent(),courseID)!=0){
-                    return "error:文件内容与数据库中章节有重复！请检测文件或先清空原课程数据。";
+                    return "error:文件内容与数据库中章节(名)有重复！请检测文件或先清空原课程数据。";
                 }
             }
         }
@@ -275,7 +391,8 @@ public class md2Pag {
         }
         return null;
     }
+//
 //    public static void main(String arg[]) throws IOException {
-//        md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",102,101);
+//        md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",102);
 //    }
 }

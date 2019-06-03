@@ -31,19 +31,30 @@ public class md2Pag {
      * content==null表示在其他段中合并储存
      */
     @Autowired
-    private CourseMapper courseMapper;
-    @Autowired
     private SectionMapper sectionMapper;
     @Autowired
     private KnowledgeMapper knowledgeMapper;
     @Autowired
     private ParagraphMapper paragraphMapper;
-    public static char[] type={21,22,23,'I','T','L',60,'P',72,'C'};
+    public static final  char[] type;
+    static {
+        type = new char[]{21, 22, 23, 'I', 'T', 'L', 60, 'P', 72, 'C'};
+    }
+
     private static md2Pag md2pagUtils;
     @PostConstruct
     public void init() {
         md2pagUtils = this;
     }
+
+    /**
+     * 调用该方法储存md文件
+     * 注：多线程同时调用是，尽管其他变量均在方法内创建，但sectionMapper等是注入的全局变量，可能会有干扰，也可能不会，需要测试
+     * @param filePath 文件完整路径
+     * @param courseID 课程id
+     * @return 错误码 为null表示没有错
+     * @throws IOException _
+     */
     public static String toolRun(String filePath,Integer courseID) throws IOException {
         Integer courseSeq=courseID;
         //读取文件
@@ -56,13 +67,8 @@ public class md2Pag {
         if(errorstr!=null){
             return errorstr;
         }
-        //储存
-        errorstr=saveParagraph(saveP,courseID,courseSeq);
-        if(errorstr!=null){
-            return errorstr;
-        }
 
-//        //test
+//        //test输出识别结果
 //        for(tempParagraph tp:saveP){
 //            if(tp.getContent()==null){
 //            }else if(tp.getType()==type[0]){
@@ -87,6 +93,13 @@ public class md2Pag {
 //                System.out.print( "\n"+tp.id+":<代码块>:"+tp.getContent());
 //            }
 //        }
+
+        //储存
+        errorstr=saveParagraph(saveP,courseID,courseSeq);
+        if(errorstr!=null){
+            return errorstr;
+        }
+
         return null;//返回null表示没有问题
     }
     //按CSDN编辑器的标准判断，不一定符合所有的morkdown标准
@@ -303,21 +316,22 @@ public class md2Pag {
         int l=strA2.size();
         if(l<1)
             return;
-        String str=strA2.get(0);
+        StringBuilder str= new StringBuilder( strA2.get( 0 ) );
         for(int i=1;i<l;i++){
-            str+="\n"+strA2.get(i);
+            str.append( "\n" ).append( strA2.get( i ) );
         }
-        saveP.add(new tempParagraph(jid,typec,str));
+        saveP.add(new tempParagraph(jid,typec, str.toString() ));
         strA2.clear();
     }
-    public static String saveParagraph(ArrayList<tempParagraph> saveP,Integer courseID,Integer courseSeq){
+
+    private static String saveParagraph(ArrayList<tempParagraph> saveP,Integer courseID,Integer courseSeq){
         Section section=new Section();
         Knowledge knowledge=new Knowledge();
         Paragraph paragraph=new Paragraph();
         int ji=0;
         //序号
         int secseq=md2pagUtils.sectionMapper.selectSectionMaxID(courseID);
-        System.out.println("课程知识点序号"+secseq);////////////////////////////////////
+        System.out.println("课程节序号"+secseq);////////////////////////////////////
         if(secseq==0){
             secseq=courseSeq*100;
         }else{//查重
@@ -335,8 +349,10 @@ public class md2Pag {
         int knowid=-1;
 
         for(tempParagraph tp:saveP){
-            if(tp.getContent()==null){
-            }else if(tp.getType()==type[1]||tp.getType()==type[0]){//章或节
+            if(tp.getContent()==null) {
+                continue;
+            }
+            if(tp.getType()==type[1]||tp.getType()==type[0]){//章或节
                 section.setSid( ++secseq );
                 section.setSectionCourse( courseID );
                 section.setSectionName( tp.getContent() );
@@ -352,13 +368,23 @@ public class md2Pag {
                 knowledge.setKnowledgeName( tp.getContent());
                 knowledge.setKnowledgeSection(secid);
                 knowledge.setKnowledgeSeq( secseq*100+(++knowseq) );
+//                //////////////////////////
+//                System.out.print("knowledgeID<<<<<<<<<"+ knowledge.getKid() );
+//                System.out.print("knowledgeName<<<<<<<<<"+ knowledge.getKnowledgeName() );
+//                System.out.print("knowledgeSec<<<<<<<<<"+ knowledge.getKnowledgeSection() );
+//                System.out.println("knowledgeSeq<<<<<<<<<"+ knowledge.getKnowledgeSeq() );
+//
+//                ///////////////////////////////////////
                 md2pagUtils.knowledgeMapper.insert_getid(knowledge);
+//                /////////////////////////////////////////////////////////////////
+//                System.out.println("knowledgeID  结束>>>>>>>>>>>>>"+ knowledge.getKid() );
+//                //////////////////////////////////////////////////////
                 pagseq=0;
 //                knowid=md2pagUtils.knowledgeMapper.selectKnowledgeID( knowledge.getKnowledgeSeq() );
                 knowid=knowledge.getKid();
             }else{//段落
                 if(knowid==-1){//这个段落没有知识点,储存节为知识点
-                    if(ji==0){//无效段落
+                    if(ji==0){//第一段不是标题，无效段落，防止window自动在开头加"?"
                         ji++;
                         continue;
                     }
@@ -391,8 +417,9 @@ public class md2Pag {
         }
         return null;
     }
-//
-//    public static void main(String arg[]) throws IOException {
+
+//    //
+//    public static void main(String args[]) throws IOException {
 //        md2Pag.toolRun("E:\\Workbench\\IDEA\\Zhiku_workbench\\写作模板.md",102);
 //    }
 }

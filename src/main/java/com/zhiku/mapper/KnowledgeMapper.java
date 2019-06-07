@@ -3,12 +3,18 @@ package com.zhiku.mapper;
 import com.zhiku.entity.Knowledge;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 public interface KnowledgeMapper {
     int deleteByPrimaryKey(Integer kid);
 
+    int deleteBySeqCourse(Integer cid);
+
     int insert(Knowledge record);
 
-    int insert_getid(Knowledge record);
+    int insertGetId(Knowledge record);
+
+    int insertAllGetIds(List<Knowledge> record);
 
     int insertSelective(Knowledge record);
 

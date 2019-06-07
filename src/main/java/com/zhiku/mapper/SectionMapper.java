@@ -4,10 +4,16 @@ import com.zhiku.entity.Section;
 import com.zhiku.view.SectionView;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 public interface SectionMapper {
     int deleteByPrimaryKey(Integer sid);
 
+    int deleteByCourseId(Integer cid);
+
     int insert(Section record);
+
+    int insertAll(List<Section> record);
 
     int insertSelective(Section record);
 

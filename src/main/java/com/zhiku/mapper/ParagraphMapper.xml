@@ -29,6 +29,10 @@
     delete from paragraph
     where pid = #{pid,jdbcType=INTEGER}
   </delete>
+  <delete id="deleteBySeqCourse" parameterType="java.lang.Integer">
+    delete from paragraph
+    where paragraph_seq like concat(#{pid,jdbcType=INTEGER},'%')
+  </delete>
   <insert id="insert" parameterType="com.zhiku.entity.Paragraph">
     insert into paragraph (pid, paragraph_seq, paragraph_knowledge, 
       paragraph_type, paragraph_newline, paragraph_content
@@ -36,6 +40,17 @@
     values (#{pid,jdbcType=INTEGER}, #{paragraphSeq,jdbcType=INTEGER}, #{paragraphKnowledge,jdbcType=INTEGER}, 
       #{paragraphType,jdbcType=CHAR}, #{paragraphNewline,jdbcType=CHAR}, #{paragraphContent,jdbcType=LONGVARCHAR}
       )
+  </insert>
+  <insert id="insertAll" parameterType="java.util.List" >
+    insert into paragraph (pid, paragraph_seq, paragraph_knowledge,
+    paragraph_type, paragraph_newline, paragraph_content
+    )
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.pid,jdbcType=INTEGER}, #{item.paragraphSeq,jdbcType=INTEGER}, #{item.paragraphKnowledge,jdbcType=INTEGER},
+      #{item.paragraphType,jdbcType=CHAR}, #{item.paragraphNewline,jdbcType=CHAR}, #{item.paragraphContent,jdbcType=LONGVARCHAR}
+      )
+    </foreach>
   </insert>
   <insert id="insertSelective" parameterType="com.zhiku.entity.Paragraph">
     insert into paragraph

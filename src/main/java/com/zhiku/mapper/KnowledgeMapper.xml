@@ -20,17 +20,30 @@
     delete from knowledge
     where kid = #{kid,jdbcType=INTEGER}
   </delete>
+  <delete id="deleteBySeqCourse" parameterType="java.lang.Integer">
+    delete from knowledge
+    where knowledge_seq like concat(#{kid,jdbcType=INTEGER},'%')
+  </delete>
   <insert id="insert" parameterType="com.zhiku.entity.Knowledge">
     insert into knowledge (kid, knowledge_seq, knowledge_name, 
       knowledge_section)
     values (#{kid,jdbcType=INTEGER}, #{knowledgeSeq,jdbcType=INTEGER}, #{knowledgeName,jdbcType=VARCHAR}, 
       #{knowledgeSection,jdbcType=INTEGER})
   </insert>
-  <insert id="insert_getid" useGeneratedKeys="true" keyProperty="kid"  parameterType="com.zhiku.entity.Knowledge">
+  <insert id="insertGetId"  parameterType="com.zhiku.entity.Knowledge">
     insert into knowledge (kid, knowledge_seq, knowledge_name,
       knowledge_section)
     values (#{kid,jdbcType=INTEGER}, #{knowledgeSeq,jdbcType=INTEGER}, #{knowledgeName,jdbcType=VARCHAR},
       #{knowledgeSection,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertAllGetIds" useGeneratedKeys="true" keyProperty="kid"  parameterType="java.util.List">
+    insert into knowledge (kid, knowledge_seq, knowledge_name,
+      knowledge_section)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.kid,jdbcType=INTEGER}, #{item.knowledgeSeq,jdbcType=INTEGER}, #{item.knowledgeName,jdbcType=VARCHAR},
+      #{item.knowledgeSection,jdbcType=INTEGER})
+    </foreach>
   </insert>
   <insert id="insertSelective" parameterType="com.zhiku.entity.Knowledge">
     insert into knowledge

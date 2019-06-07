@@ -16,6 +16,13 @@
     from course
     where cid = #{cid,jdbcType=INTEGER}
   </select>
+  <select id="selectByTitleDec" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from course
+    where course_name = #{title,jdbcType=VARCHAR}
+    and course_desc =#{describe,jdbcType=VARCHAR}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from course
     where cid = #{cid,jdbcType=INTEGER}
@@ -24,6 +31,12 @@
     insert into course (cid, course_name, course_desc, 
       course_icon)
     values (#{cid,jdbcType=INTEGER}, #{courseName,jdbcType=VARCHAR}, #{courseDesc,jdbcType=VARCHAR}, 
+      #{courseIcon,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertGetId" useGeneratedKeys="true" keyProperty="cid" parameterType="com.zhiku.entity.Course">
+    insert into course (cid, course_name, course_desc,
+      course_icon)
+    values (#{cid,jdbcType=INTEGER}, #{courseName,jdbcType=VARCHAR}, #{courseDesc,jdbcType=VARCHAR},
       #{courseIcon,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.zhiku.entity.Course">

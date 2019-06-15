@@ -48,7 +48,7 @@ public class MdSaverService {
             //如果文件夹不存在则创建
             File dir =new File(rootFPath);
             if  (!dir .exists()&&!dir .isDirectory()) {
-                dir .mkdir();
+                dir .mkdirs();
             }
             String filename = file.getOriginalFilename();
             assert filename != null;
